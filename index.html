@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#133f31">
+  <meta name="description" content="Plan around outages and estimate what your appliances cost in Ghana cedis.">
+  <title>Dumsor Planner</title>
+  <link rel="icon" href="assets/icon.png" type="image/png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="./" aria-label="Dumsor Planner home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Dumsor Planner
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#planner">Outage planner</a>
+        <a href="#optimizer">Energy optimizer</a>
+      </nav>
+      <span class="offline-status" id="offline-status" role="status">Checking offline access</span>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-content">
+        <p class="hero-kicker"><span class="flag" aria-hidden="true"></span> Built for Ghana</p>
+        <h1 id="page-title">Dumsor<br>Planner<span>.</span></h1>
+        <p>Plan around power cuts and see what each appliance costs to run.</p>
+        <div class="hero-actions">
+          <a class="button button-lime" href="#planner">Plan your week <span aria-hidden="true">↓</span></a>
+          <a class="button button-outline" href="#optimizer">Estimate energy costs</a>
+        </div>
+      </div>
+      <div class="hero-photo" aria-hidden="true"></div>
+    </section>
+    <noscript><p class="notice">Enable JavaScript to edit your plan and calculate energy estimates.</p></noscript>
+    <p id="announcer" class="visually-hidden" role="status"></p>
+    <p id="storage-warning" class="notice" hidden>This browser blocked local storage. Changes last until you close or reload the page.</p>
+
+    <section id="planner" class="work-section" aria-labelledby="planner-title">
+      <div class="section-head">
+        <div>
+          <h2 id="planner-title">Outage planner</h2>
+          <p>Build a weekly plan for charging, appliances, and work.</p>
+        </div>
+        <div class="city-picker">
+          <label for="city">Planning area</label>
+          <select id="city"></select>
+        </div>
+      </div>
+      <div class="notice" id="schedule-note">
+        <span class="notice-icon" aria-hidden="true">i</span>
+        <p><strong>Sample and user-entered planning data.</strong> No real or live ECG grid data. Open time means no outage is recorded in your plan.</p>
+      </div>
+
+      <div class="planner-grid">
+        <div class="card week-card">
+          <div class="card-head">
+            <div>
+              <h3>Weekly outage plan</h3>
+              <p>Repeats weekly · Ghana time (GMT)</p>
+            </div>
+            <button class="button button-primary" type="button" id="open-outage" aria-controls="outage-form" aria-expanded="false">+ Add outage</button>
+          </div>
+          <div class="legend" aria-label="Timeline legend">
+            <span><i class="swatch swatch-open"></i> Open in plan</span>
+            <span><i class="swatch swatch-sample"></i> Sample</span>
+            <span><i class="swatch swatch-user"></i> User-entered</span>
+          </div>
+          <div class="time-axis" aria-hidden="true">
+            <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
+          </div>
+          <div class="week-days" id="week-days" role="group" aria-label="Choose a day" aria-describedby="schedule-note"></div>
+        </div>
+
+        <div class="card day-card">
+          <div class="card-head">
+            <div>
+              <h3 id="day-title">Monday plan</h3>
+              <p>Suggested times · based on your plan</p>
+            </div>
+          </div>
+          <ul class="activity-list" id="activities" aria-labelledby="day-title"></ul>
+          <div class="outage-detail">
+            <h4>Outage windows</h4>
+            <ul class="outage-list" id="outage-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <form class="card edit-form" id="outage-form" hidden>
+        <h3 id="outage-form-title">Add outage</h3>
+        <p>Your changes are marked as user-entered. An earlier end time continues into the next day.</p>
+        <div class="form-grid outage-fields">
+          <label>Starts on<select id="outage-day" required></select></label>
+          <label>Start time<input id="outage-start" type="time" required></label>
+          <label>End time<input id="outage-end" type="time" required></label>
+        </div>
+        <div class="form-actions">
+          <button class="button button-primary" type="submit">Save outage</button>
+          <button class="button button-secondary" type="button" id="cancel-outage">Cancel</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="optimizer" class="work-section" aria-labelledby="optimizer-title">
+      <div class="section-head">
+        <div>
+          <h2 id="optimizer-title">Energy optimizer</h2>
+          <p>Estimate daily usage and what it adds up to over a 30-day month.</p>
+        </div>
+      </div>
+      <div class="energy-grid">
+        <div class="card appliance-card">
+          <div class="card-head">
+            <div>
+              <h3>Appliances</h3>
+              <p>Enter running watts and average hours used per day.</p>
+            </div>
+            <button class="button button-primary" type="button" id="open-appliance" aria-controls="appliance-form" aria-expanded="false">+ Add appliance</button>
+          </div>
+          <ul class="appliance-list" id="appliance-list" aria-label="Appliance inputs"></ul>
+          <form class="edit-form appliance-form" id="appliance-form" hidden>
+            <h4 id="appliance-form-title">Add appliance</h4>
+            <div class="form-grid appliance-fields">
+              <label>Name<input id="appliance-name" type="text" maxlength="48" placeholder="e.g. Shop freezer" required></label>
+              <label>Type<select id="appliance-type" required></select></label>
+              <label>Watts<input id="appliance-watts" type="number" inputmode="decimal" min="0" max="100000" step="any" required></label>
+              <label>Hours/day<input id="appliance-hours" type="number" inputmode="decimal" min="0" max="24" step="any" required></label>
+            </div>
+            <div class="form-actions">
+              <button class="button button-primary" type="submit">Save appliance</button>
+              <button class="button button-secondary" type="button" id="cancel-appliance">Cancel</button>
+            </div>
+          </form>
+        </div>
+        <div class="card estimate-card">
+          <div class="card-head"><h3>Energy &amp; cost estimates</h3></div>
+          <div class="tariff-field">
+            <label for="tariff">Electricity tariff (GHS/kWh)</label>
+            <input id="tariff" type="number" min="0" max="1000" step="any" inputmode="decimal" required aria-describedby="tariff-hint">
+            <p id="tariff-hint">Estimate · illustrative flat rate. Enter the rate from your bill.</p>
+          </div>
+          <dl id="energy-totals" class="energy-totals" aria-label="Estimated usage and cost"></dl>
+          <p class="estimate-note">Estimates use a flat energy rate. Fixed fees and taxes are excluded.</p>
+        </div>
+      </div>
+      <div class="savings">
+        <h3>Ways to save</h3>
+        <p>Monthly savings estimates for individual actions. Results vary by appliance and usage.</p>
+        <ul id="savings-list" class="savings-list" aria-label="Estimated savings recommendations"></ul>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>Dumsor Planner <span>·</span> Hackathon 2026 Challenge</p>
+      <p>Planning inputs stay in this browser.</p>
+      <a href="https://github.com/ZQ051031/hackathon-2026-challenge">GitHub repository <span aria-hidden="true">↗</span></a>
+    </div>
+  </footer>
+</body>
+</html>
